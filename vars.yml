@@ -11,7 +11,7 @@ vsphere_vm_folder: LABS/itay/l01/tkg/templates
 vsphere_datastore: LAB-V3-vSANDatastore
 vsphere_network: itay-k8s-mgmt
 
-# Comment out and set vsphere_resource_pool if desired
+# Uncomment and set vsphere_resource_pool if desired
 # vsphere_resource_pool: US
 
 # Windows OS
