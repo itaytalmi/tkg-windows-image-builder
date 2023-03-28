@@ -1,0 +1,10 @@
+---
+win_registry_items:
+  - path: HKLM:\SOFTWARE\MyCompany
+    name: CompanyName
+    type: string
+    data: cloudnativeapps.blog
+  - path: HKLM:\SOFTWARE\MyCompany
+    name: ProjectName
+    type: string
+    data: Kubernetes

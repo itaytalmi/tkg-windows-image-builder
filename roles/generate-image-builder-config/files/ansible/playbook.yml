@@ -1,0 +1,5 @@
+- name: Playbook for troubleshooting specific roles
+  hosts: all
+  gather_facts: true
+  roles:
+    - csi-proxy-setup

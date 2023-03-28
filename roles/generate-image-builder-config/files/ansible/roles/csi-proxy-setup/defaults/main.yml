@@ -1,0 +1,10 @@
+---
+csi_proxy_executable: "{{ role_path }}/files/csi-proxy.exe"
+
+csi_proxy_bin_dir: C:\etc\kubernetes\node\bin
+csi_proxy_bin_file: "{{ csi_proxy_bin_dir }}\\csi-proxy.exe"
+
+csi_proxy_log_dir: C:\etc\kubernetes\logs
+csi_proxy_log_file: "{{ csi_proxy_log_dir }}\\csi-proxy.log"
+
+csi_proxy_service_flags: "-windows-service -log_file={{ csi_proxy_log_file }} -logtostderr=false"

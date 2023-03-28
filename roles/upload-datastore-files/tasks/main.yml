@@ -1,0 +1,27 @@
+---
+- name: Create directory on datastore
+  community.vmware.vsphere_file:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_iso_datastore }}"
+    path: "{{ vsphere_datastore_dir_path }}"
+    state: directory
+    validate_certs: false
+  delegate_to: localhost
+
+- name: Upload files to datastore
+  community.vmware.vsphere_copy:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_iso_datastore }}"
+    src: "{{ datastore_file }}"
+    path: "{{ vsphere_datastore_dir_path }}/{{ datastore_file | split('/') | last }}"
+    validate_certs: false
+  delegate_to: localhost
+  loop: "{{ vsphere_datastore_files }}"
+  loop_control:
+    loop_var: datastore_file

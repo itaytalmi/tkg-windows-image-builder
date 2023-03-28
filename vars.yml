@@ -1,0 +1,35 @@
+# TKG management cluster kubectl context
+k8s_context: l02-tkg-mgmt-admin@l02-tkg-mgmt
+
+# vSphere & Packer
+vcenter_hostname: vcsa.cloudnativeapps.cloud
+vcenter_username: your-vsphere-username
+vcenter_password: your-vsphere-password
+vsphere_datacenter: Main
+vsphere_cluster: LAB-V3
+vsphere_vm_folder: LABS/itay/l01/tkg/templates
+vsphere_datastore: LAB-V3-vSANDatastore
+vsphere_network: itay-k8s-mgmt
+
+# Comment out and set vsphere_resource_pool if desired
+# vsphere_resource_pool: US
+
+# Windows OS
+vsphere_iso_datastore: LAB-V3-vSANDatastore
+vsphere_datastore_dir_path: iso/tkg-windows
+vm_tools_iso_file_name: VMware-tools-windows-12.2.0-21223074.iso
+windows_iso_file_name: en-us_windows_server_2019_updated_aug_2021_x64_dvd_a6431a28.iso
+
+# Valid options typically include: Windows Server 2019 SERVERSTANDARDCORE, Windows Server 2019 SERVERDATACENTERCORE
+windows_image_id: Windows Server 2019 SERVERSTANDARDCORE
+windows_updates_categories: CriticalUpdates SecurityUpdates UpdateRollups
+
+# Comment out windows_product_key if an evaluation of Windows is desired
+# windows_product_key: "your-windows-product-key"
+
+vsphere_datastore_files:
+  - "/home/{{ ansible_user_id }}/tkg/{{ vm_tools_iso_file_name }}"
+  - "/home/{{ ansible_user_id }}/tkg/{{ windows_iso_file_name }}"
+
+docker_enable_custom_ansible_roles: true
+ansible_user_vars: "node_custom_roles_post='/home/imagebuilder/ansible/windows/custom_roles/csi-proxy-setup /home/imagebuilder/ansible/windows/custom_roles/win-regedit'"

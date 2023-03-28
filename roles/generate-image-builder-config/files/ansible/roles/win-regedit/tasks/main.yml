@@ -1,0 +1,10 @@
+---
+- name: Apply Windows registry configuration
+  ansible.windows.win_regedit:
+    path: "{{ win_registry_item.path }}"
+    name: "{{ win_registry_item.name }}"
+    type: "{{ win_registry_item.type }}"
+    data: "{{ win_registry_item.data }}"
+  loop: "{{ win_registry_items }}"
+  loop_control:
+    loop_var: win_registry_item

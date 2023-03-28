@@ -1,0 +1,106 @@
+---
+- name: Get Kubernetes Control Plane nodes
+  kubernetes.core.k8s_info:
+    kind: Node
+    label_selectors:
+      - node-role.kubernetes.io/control-plane
+      - kubernetes.io/os = linux
+  register: control_plane_node
+
+- name: Extract a Control Plane node's IP address
+  ansible.builtin.set_fact:
+    control_plane_node_ip: "{{ (control_plane_node.resources[0].status.addresses | selectattr('type', 'equalto', 'ExternalIP'))[0].address }}"
+
+- name: Deploy TKG Windows Resource Bundle
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'builder.yaml.j2') }}"
+
+- name: Wait for TKG Windows Resource Bundle deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: imagebuilder
+    name: image-builder-resource-kit
+    wait: true
+    wait_condition:
+      type: Available
+      status: "True"
+      reason: MinimumReplicasAvailable
+
+- name: Wait for TKG Windows Resource Bundle deployment
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    namespace: imagebuilder
+    name: image-builder-resource-kit
+    wait: true
+    wait_condition:
+      type: Available
+      status: "True"
+      reason: MinimumReplicasAvailable
+
+- name: Wait for TKG Windows Resource Bundle website to be available and retrieve JSON output
+  ansible.builtin.uri:
+    url: "http://{{ control_plane_node_ip }}:30008"
+    return_content: true
+  register: imagebuilder_output
+  until: imagebuilder_output.status == 200
+  retries: 180
+  delay: 5
+
+- name: Convert TKG Windows Resource Bundle output to JSON
+  ansible.builtin.set_fact:
+    imagebuilder_json: "{{ imagebuilder_output.content | from_json }}"
+
+- name: Parse TKG Windows Resource Bundle component details
+  ansible.builtin.set_fact:
+    antrea_windows_path: "{{ imagebuilder_json['antrea-windows']['path'] }}"
+    kubeproxy_path: "{{ imagebuilder_json['kube-proxy']['path'] }}"
+    containerd_path: "{{ imagebuilder_json['containerd']['path'] }}"
+    containerd_sha256: "{{ imagebuilder_json['containerd']['sha256'] }}"
+    cloudbase_init_path: "{{ imagebuilder_json['cloudbase_init']['path'] }}"
+    # ssh_path: "{{ imagebuilder_json['ssh']['path'] }}"
+    # goss_path: "{{ imagebuilder_json['goss']['path'] }}"
+    # nssm_path: "{{ imagebuilder_json['nssm']['path'] }}"
+    wins_path: "{{ imagebuilder_json['wins']['path'] }}"
+
+- name: Generate Windows JSON
+  ansible.builtin.set_fact:
+    windows_json: "{{ lookup('template', 'windows.json.j2') }}"
+    autounattend_xml: "{{ lookup('template', 'autounattend.xml.j2') }}"
+
+- name: Create output directory for generated files
+  ansible.builtin.file:
+    state: directory
+    dest: "{{ playbook_dir }}/output"
+    mode: 0755
+
+- name: Generate windows.json
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'windows.json.j2') | to_nice_json }}"
+    dest: "{{ playbook_dir }}/output/windows.json"
+    mode: 0644
+
+- name: Generate autounattend.xml content
+  community.general.xml:
+    xmlstring: "{{ lookup('template', 'autounattend.xml.j2') }}"
+    pretty_print: true
+  register: autounattend_xml_content
+  changed_when: false
+
+- name: Generate autounattend.xml
+  ansible.builtin.copy:
+    content: "{{ autounattend_xml_content.xmlstring }}"
+    dest: "{{ playbook_dir }}/output/autounattend.xml"
+    mode: 0644
+
+- name: Generate build-image.sh
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'build-image.sh.j2') }}"
+    dest: "{{ playbook_dir }}/output/build-image.sh"
+    mode: 0755
+
+- name: Copy custom Ansible roles for Docker volume
+  ansible.posix.synchronize:
+    src: "{{ role_path }}/files/ansible"
+    dest: "{{ playbook_dir }}/output/"
+    delete: true
+    recursive: true

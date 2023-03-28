@@ -1,0 +1,10 @@
+---
+- name: Create vSphere VM Folders
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  roles:
+    - role: 
+

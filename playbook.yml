@@ -1,0 +1,11 @@
+- name: Generate Configurations and Prerequisites for Windows TKG Workload Clusters
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  environment:
+    K8S_AUTH_CONTEXT: "{{ k8s_context }}"
+  roles:
+    - generate-image-builder-config
+    - upload-datastore-files
+  vars_files:
+    - vars.yml

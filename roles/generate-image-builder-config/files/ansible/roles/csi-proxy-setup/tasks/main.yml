@@ -1,0 +1,26 @@
+---
+- name: Create CSI Proxy bin directory
+  ansible.windows.win_file:
+    path: "{{ csi_proxy_bin_dir }}"
+    state: directory
+
+- name: Create CSI Proxy log directory
+  ansible.windows.win_file:
+    path: "{{ csi_proxy_log_dir }}"
+    state: directory
+
+- name: Copy CSI Proxy binary
+  ansible.windows.win_copy:
+    src: "{{ csi_proxy_executable }}"
+    dest: "{{ csi_proxy_bin_dir }}"
+
+- name: Create CSI Proxy service
+  ansible.windows.win_service:
+    name: csiproxy
+    path: "{{ csi_proxy_bin_file }} {{ csi_proxy_service_flags }}"
+    start_mode: auto
+    state: started
+    failure_reset_period_sec: 0
+    failure_actions:
+      - type: restart
+        delay_ms: 10000

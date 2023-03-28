@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCRIPT_PATH="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
+
+docker run -it --rm \
+{% if docker_enable_custom_ansible_roles %}
+-v "$SCRIPT_PATH/ansible/roles:/home/imagebuilder/ansible/windows/custom_roles" \
+{% endif %}
+{% if windows_update_local_source_dir != "" %}
+-v "{{ windows_update_local_source_dir }}:/home/imagebuilder/windows-updates" \
+{% endif %}
+--mount type=bind,source="$SCRIPT_PATH/windows.json",target=/windows.json \
+--mount type=bind,source="$SCRIPT_PATH/autounattend.xml",target=/home/imagebuilder/packer/ova/windows/windows-2019/autounattend.xml \
+-e PACKER_VAR_FILES="/windows.json" \
+-e IB_OVFTOOL=1 \
+-e IB_OVFTOOL_ARGS='--skipManifestCheck' \
+-e PACKER_FLAGS='-force -on-error=ask' \
+-e PACKER_LOG=1 \
+-t {{ tkg_image_builder_image }} build-node-ova-vsphere-windows-2019
