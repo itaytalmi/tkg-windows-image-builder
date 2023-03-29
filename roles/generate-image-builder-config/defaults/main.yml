@@ -1,6 +1,7 @@
 ---
 tkg_windows_resource_bundle_image: projects.registry.vmware.com/tkg/windows-resource-bundle:v1.24.10_vmware.1-tkg.2
 tkg_windows_resource_bundle_port: "30008"
+tkg_image_builder_image: projects.registry.vmware.com/tkg/image-builder:v0.1.13_vmware.2
 
 # windows.json parameters
 kubernetes_semver: v1.24.10+vmware.1
@@ -11,13 +12,12 @@ pause_image: mcr.microsoft.com/oss/kubernetes/pause:3.6
 unattend_timezone: Eastern Standard Time
 windows_updates_categories: "CriticalUpdates SecurityUpdates UpdateRollups"
 windows_updates_kbs: ""
-vsphere_resource_pool: "US"
+vsphere_resource_pool: ""
 ansible_user_vars: ""
 windows_product_key: ""
 disk_size_mb: "81920"
 wins_version: "0.0.4"
 
 # Docker customization
-tkg_image_builder_image: projects.registry.vmware.com/tkg/image-builder:v0.1.13_vmware.2
 docker_enable_custom_ansible_roles: false
 windows_update_local_source_dir: ""
